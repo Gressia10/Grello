@@ -144,65 +144,69 @@ public class Tableros extends HttpServlet {
 			
 		System.out.println("Entramos en borrar Tablero");
 		try {
-			dataBoard = db.LeerUsuario(data);
-			System.out.println("Esto" +dataBoard);
-			if(dataBoard.size() == 1){
-				System.out.println("Opcion 1");
-				boolean tabla = db.BorrarUsuTa(data);
-				if(tabla) {
-					System.out.println("Fue borrado el tablero de la tabla user_board");
-					boolean status = db.BorrarTablero(data);
-					if (status) {
+			if(db.SeleccionarAdmin(data.getInt("id"))) {
+				System.out.println("Admin de la pagina");
+				if(db.BorrarTablero(data)) {
+					mensaje.put("status", 200).put("response", "El tablero fue borrado");
+					System.out.println("El tablero fue borrado de la tabla board");
+				}else {
+					mensaje.put("status", 500).put("response","No se puedo borrar");
+				}
+			}else {
+				System.out.println("Usuario de la pagina");
+				dataBoard = db.LeerUsuario(data);
+				System.out.println("Esto" +dataBoard);
+				if(dataBoard.size() == 1){
+					System.out.println("Opcion 1");
+					if (db.BorrarTablero(data)) {
 						mensaje.put("status", 200).put("response", "El tablero fue borrado");
 						System.out.println("El tablero fue borrado de la tabla board");
 					}else {
 						mensaje.put("status", 500).put("response","No se puedo borrar");
 					}
-				}else {
-					mensaje.put("status", 500).put("response","No se puedo borrar el tablero de la tabla user_board");
-					System.out.println("No fue borrado el tablero de la tabla user_board");
-				}
-			}else{
-				System.out.println("Opcion 2");
-				if(db.LeerEstado(data)) {
-					System.out.println("Opcion Admin");
-					
-					int i = - dataBoard.size()+ db.LeerAdmin(data).size() ;
-					System.out.println("i: "+ i);
-					if(i > 1) {
-						System.out.println("Mas de un  Admin: ");
-						boolean tabla = db.BorrarUsuTa(data);
-						if(tabla) {
+				}else{
+					System.out.println("Opcion 2");
+					if(db.LeerEstado(data)) {
+						System.out.println("Opcion Admin");
+						
+						int i = - dataBoard.size()+ db.LeerAdmin(data).size() ;
+						System.out.println("i: "+ i);
+						if(i > 1) {
+							System.out.println("Mas de un  Admin: ");
+							if(db.BorrarUsuTa(data)) {
+								System.out.println("Fue borrado el tablero de la tabla user_board");
+								mensaje.put("status", 200).put("response","Fue borrado de la tabla user_boards");
+								/*boolean status = db.BorrarTablero(data);
+								if (status) {
+									mensaje.put("status", 200).put("response", "El tablero fue borrado");
+									System.out.println("El tablero fue borrado de la tabla board");
+								}else {
+									System.out.println("No se pudo borrar de la tabla boards");
+									mensaje.put("status", 500).put("response","No se pudo borrar de la tabla boards");
+								}*/
+							}else {
+								mensaje.put("status", 500).put("response","No se pudo borrar de la tabla user_boards");
+								System.out.println("No fue borrado el tablero de la tabla user_board");
+							}
+						}else {
+							mensaje.put("status", 409).put("response","Debe quedar un administrador");
+						}
+					}else {
+						System.out.println("Opcion Invitado");
+						if(db.BorrarUsuTa(data)) {
 							System.out.println("Fue borrado el tablero de la tabla user_board");
-							boolean status = db.BorrarTablero(data);
+							mensaje.put("status", 200).put("response", "El tablero fue borrado de user_board");
+							/*boolean status = db.BorrarTablero(data);
 							if (status) {
 								mensaje.put("status", 200).put("response", "El tablero fue borrado");
 								System.out.println("El tablero fue borrado de la tabla board");
 							}else {
-								System.out.println("No se pudo borrar de la tabla boards");
-								mensaje.put("status", 500).put("response","No se pudo borrar de la tabla boards");
-							}
+								mensaje.put("status", 500).put("response","No se puedo borrar");
+							}*/
 						}else {
+							mensaje.put("status", 500).put("response","No se puedo borrar el tablero de la tabla user_boards");
 							System.out.println("No fue borrado el tablero de la tabla user_board");
 						}
-					}else {
-						mensaje.put("status", 409).put("response","Debe quedar un administrador");
-					}
-				}else {
-					System.out.println("Opcion Invitado");
-					boolean tabla = db.BorrarUsuTa(data);
-					if(tabla) {
-						System.out.println("Fue borrado el tablero de la tabla user_board");
-						boolean status = db.BorrarTablero(data);
-						if (status) {
-							mensaje.put("status", 200).put("response", "El tablero fue borrado");
-							System.out.println("El tablero fue borrado de la tabla board");
-						}else {
-							mensaje.put("status", 500).put("response","No se puedo borrar");
-						}
-					}else {
-						mensaje.put("status", 500).put("response","No se puedo borrar el tablero de la tabla boards");
-						System.out.println("No fue borrado el tablero de la tabla user_board");
 					}
 				}
 			}

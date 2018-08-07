@@ -786,7 +786,7 @@ function actualizarTarjeta(t){
         });	
 }
 
-function actualizarInvitado(t){
+function actualizarInvitado(){
 	userLogin = localStorage.getItem("id");
 	var json ={
             tipo: "actualizar",
@@ -851,12 +851,13 @@ function borrarTablero(t){
                 /*localStorage.setItem('columna', JSON.stringify(arrayColumn));
                 localStorage.setItem('columndId', JSON.stringify(arrayColumn.column_id));
                 localStorage.setItem('columnName', JSON.stringify(arrayColumn.column_name));*/
+    			window.location.reload(false);
             }else if(data.status == 409){
             	alert("Debe quedar un administrador");
             }else if(data.status == 500){
             	
             }
-    		window.location.reload(false);
+    		
             
         });	
 }
@@ -932,7 +933,8 @@ function borrarInvitado(t){
 	userLogin = localStorage.getItem("id");
 	var json ={
             user_id: t,
-            id: userLogin
+            id: userLogin,
+            board_id: Id
     }
     
     
@@ -953,7 +955,12 @@ function borrarInvitado(t){
     		if(data.status == 200){
     			console.log(data);
     			window.location.reload(false);
+            }else if(data.status == 408){
+    			alert("Solo los administradores pueden borrar a los invitados");
+            }else if(data.status == 409){
+    			alert("Debe quedar un administrador");
             }	
+            	
             
         });	
 	
@@ -1024,9 +1031,9 @@ function borrarArchivo(t){
 
 //---------------------------------------------Buscador---------------------------------------------------------------
 function buscar(){
+	userLogin = localStorage.getItem("id");
     let configs = {
             method: 'get',
-            //body: JSON.stringify(json),
             withCredentials: true,
             credentials: 'include',
             headers: {
@@ -1034,13 +1041,13 @@ function buscar(){
             }
     }
 	
-	var url = '../Buscador?board_name='+document.getElementById("buscador").value
+	var url = '../Buscador?board_name='+document.getElementById("buscador").value+'?id='+userLogin
 
     fetch(url, configs)
     	.then( r => r.json() )
         .then(data => {console.log(data)
         	let arrayBuscar = data.response;
-            if(data.status == 200){console.log(data);
+            if(data.status == 200){
             	console.log("Todo bien");
             	for (var i = 0; i < arrayBuscar.length; i++){
             		console.log("board id "+i+": "+arrayBuscar[i].board_id);	        			
@@ -1062,6 +1069,29 @@ function buscar(){
             	localStorage.setItem('datos', JSON.stringify(arrayBuscar));
             }else if(data.status == 409){
             	alert("El usuario no existe");
+            }else if(data.status == 201){
+        		console.log("status 201 del buscador");
+        		for(var i = 0; i < arrayBuscar.length; i++){
+        		let container = `
+        			<div class="col-md-4" style=" width: 250px">
+        				<button id="modificar" type="button" onclick="goToUpdate(${arrayBuscar[i].board_id})" class="btn btn-info add-new" style="background-color: #1b9891;" data-toggle="modal" data-target="#update"><img src="../img/plus.png" style="width:30px; height:30px;" >
+							Modificar
+						</button>
+						<button id="eliminar" type="button" onclick="borrarTablero(${arrayBuscar[i].board_id})" class="btn btn-info add-new" style="background-color: #1b9891;" data-toggle="modal" ><img src="../img/delete.png" style="width:30px; height:30px;">
+						</button>
+        				<div onclick="goToDetails(${arrayBuscar[i].board_id})" onclass="card w-40" style="width: inherit; margin-top:auto;">
+	        				<div class="card-header text-center">  
+	        					
+								<br>
+								${arrayBuscar[i].board_name}
+        						<div class="card-body"></div>
+								<br>
+        					</div>
+        				</div>	
+        			</div>`;
+        		console.log("aqui");
+	        	document.getElementById("board").innerHTML += container;
+        		}
             }
         });
 }
@@ -1106,23 +1136,14 @@ function crearArchivo(t){
 	formData.append("user_id", userLogin);
 	formData.append("card_id", t);
 	formData.append("file_name", myFile);
-	/*var files = document.getElementById("file").files;
-	console.log(files.length);
-	for (var i = 0; i < files.length; i++) {
-		  console.log('file'+i);
-		  var file = files[i];
-		  formData.append('files[]', file, file.name);
-		}
-	formData.append('user_id', userLogin);
-	formData.append('card_id', t);*/
+	
 	let configs = {
             method: 'post',
-            //body: JSON.stringify(json),
             body: formData,
             withCredentials: true,
             credentials: 'include'
     }
-    fetch('../FileUp', configs)
+    fetch('../SubirArchivo', configs)
         .then(res => res.json())
         .then(data => {console.log(data)
         	let userData = data.userData;
@@ -1138,48 +1159,7 @@ function crearArchivo(t){
 }
 
 
-	/*var xhr = new XMLHttpRequest();
-	var myFile = "";
-	function upload(t){
-		userLogin = localStorage.getItem("id");
-		var formData = new FormData();
-		formData.append("file", document.getElementById("file").files[0]);
-		//myFile = $("file").files.name;
-		formData.append("user_id", userLogin);
-		formData.append("card_id", t);
-		
-		xhr.onreadystatechange = function () {
-			if (xhr.status === 200 && xhr.readyState === 4) {
-				$("uploadStatus").textContent = xhr.responseText + "\nFile uploaded";
-			}
-		}
-		
-		xhr.open("post", "../FileUp", true);	
-		xhr.send(formData);
-		
-	}
-	
-	function mulUpload(t){
-		userLogin = localStorage.getItem("id");
-		var formData = new FormData();
-		var files = document.getElementById("file").files;
-		console.log(files.length);
-		formData.append("user_id", userLogin);
-		formData.append("card_id", t);
-		for (var i = 0; i < files.length; i++) {
-			  console.log('pao');
-			  var file = files[i];
-			  formData.append('photos[]', file, file.name);
-			  
-			}	
-		xhr.onreadystatechange = function () {
-			if (xhr.status === 200 && xhr.readyState === 4) {
-				$("uploadStatus").textContent = xhr.responseText + "\nFiles uploaded";
-			}
-		}
-		xhr.open("post", "../MultFilesUp", true);	
-		xhr.send(formData);
-	}*/
+
 
 
 

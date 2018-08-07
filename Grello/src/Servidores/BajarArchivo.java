@@ -63,7 +63,8 @@ public class BajarArchivo extends HttpServlet {
         
         
         System.out.println("Nombre del archivo: "+name);
-        File my_file = new File("C:\\Users\\Gressia\\Downloads\\Prueba\\"+name);
+        //File my_file = new File("C:\\Users\\Gressia\\Downloads\\Prueba\\"+ nombre);
+        File my_file = new File("C:\\Users\\Gressia\\git\\Grello\\Grello\\WebContent\\subida\\"+ id + "." + tipo);
         //File my_file = new File("C:\\test\\"+name);
 
         // This should send the file to browser

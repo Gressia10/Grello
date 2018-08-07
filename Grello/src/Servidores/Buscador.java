@@ -41,18 +41,35 @@ public class Buscador extends HttpServlet {
 		
 		System.out.println("Estoy en el metodo get del buscador");
 		String board_name = (request.getParameter("board_name"));
+		String []part = board_name.split("\\?");
+        board_name = part[0];
 		board_name = '%'+board_name+'%';
-		System.out.println("La busqueda es: "+ board_name);
+		String []partId = part[1].split("\\=");
+		Integer id= Integer.parseInt(partId[1]);
+		System.out.println("La busqueda es: "+ board_name + " el id es: "+id);
+		
 		
 		try {
 			System.out.println("comenzamos con el buscador");
-			arrayBuscar = db.Buscador(board_name);
-			if(!arrayBuscar.isEmpty()) {
-				mensaje.put("status", 200).put("response", arrayBuscar);
-				System.out.println("Todo bien hay datos que devolver");
+			if(db.SeleccionarAdmin(id)) {
+				System.out.println("Admin de la pagina");
+				arrayBuscar = db.BuscadorAdmin(board_name);
+				if(!arrayBuscar.isEmpty()) {
+					mensaje.put("status", 201).put("response", arrayBuscar);
+					System.out.println("Todo bien hay datos que devolver");
+				}else {
+					mensaje.put("status", 201).put("response", arrayBuscar);
+					System.out.println("No hay datos que devolver");
+				}
 			}else {
-				mensaje.put("status", 200).put("response", arrayBuscar);
-				System.out.println("No hay datos que devolver");
+				arrayBuscar = db.Buscador(board_name);
+				if(!arrayBuscar.isEmpty()) {
+					mensaje.put("status", 200).put("response", arrayBuscar);
+					System.out.println("Todo bien hay datos que devolver");
+				}else {
+					mensaje.put("status", 200).put("response", arrayBuscar);
+					System.out.println("No hay datos que devolver");
+				}
 			}
 		}catch(SQLException e) {
 			e.printStackTrace();

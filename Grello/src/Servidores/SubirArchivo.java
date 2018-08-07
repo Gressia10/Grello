@@ -1,5 +1,6 @@
 package Servidores;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,51 +81,60 @@ public class SubirArchivo extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		PrintWriter out = response.getWriter();
 		JSONObject mensaje = new JSONObject();
-		JSONObject data = new JSONObject(request.getReader().lines().collect(Collectors.joining(System.lineSeparator())));
+		JSONObject file_id = new JSONObject();
+		boolean status = false;
+		
 		Queries db = new Queries();
-		
-		HttpSession sesion = request.getSession();
-		Collection<Part> files = request.getParts();
-		InputStream filecontent = null; 
+		Part file = request.getPart("file");
+		InputStream filecontent = file.getInputStream();
 		OutputStream os = null;
+		Integer id = Integer.parseInt(request.getParameter("user_id"));
 		
-		System.out.println("Estamos en el metodo post de Subir Archivo");
+		
+		System.out.println("Estamos Aqui FileUp");
+		Integer user_id = Integer.parseInt(request.getParameter("user_id"));
+		Integer card_id = Integer.parseInt(request.getParameter("card_id"));
+		String file_name = getFileName(file);
+		String file_url = file.getName();
+		System.out.println("user_id: "+user_id+" card_id: "+card_id+" file_name: "+file_name+" file_url: "+file_url);
 		try {
-			//int card_id = data.getInt("card_id");
-			//int user_id = data.getInt("user_id");
-			Integer card_id = Integer.parseInt(request.getParameter("card_id"));
-			Integer user_id = Integer.parseInt(request.getParameter("user_id"));
-			if(!sesion.isNew()) {
-				String baseDir = "C:/Users/Gressia/Downloads/Prueba";
-				for(Part file : files) {
-					String file_name = getFileName(file);
-					boolean status = db.VerificarArchivo(card_id, file_name);
-					String file_url = file.getName();
-					System.out.println("file_name: "+file_name+" file_url: "+file_url+" status: "+status);
-					if(!status) {
-						filecontent = file.getInputStream();
-						status = db.AgregarArchivo(card_id, user_id, file_url, file_name);
-						os = new FileOutputStream( baseDir + "/" + this.getFileName(file));
-						int read = 0;
-						byte[] bytes = new byte[1024];
-						while ((read = filecontent.read(bytes)) != -1) {
-							os.write(bytes, 0, read);
-						}
-						mensaje.put("status", 200).put("response","La subida de archivo se realizo con exito");
-						System.out.println("La subida de archivo se realizo con exito");
-					}else {
-						mensaje.put("status", 409).put("response","Ya existe ese archivo en la tarjeta");
-						System.out.println("Ya existe ese archivo en la tarjeta");
-					}
-					
+			//String baseDir = "C:/Users/Gressia/Downloads/Prueba";
+			String baseDir = "C:/Users/Gressia/git/Grello/Grello/WebContent/subida";
+			//os = new FileOutputStream(baseDir );
+			
+			if(!db.VerificarArchivo(card_id, file_name)) {
+				if(db.AgregarArchivo(card_id, user_id, file_url, file_name)) {
+					status = true;
+					file_id = db.ObtenerIdArchivo(card_id, file_name);
+					System.out.println("El id del archivo es: " + file_id.getInt("file_id"));
 				}
-			}else {
-				mensaje.put("status", 403).put("description", "Acceso denegado");
+			
+			String []part = file_name.split("\\.");
+	        String tipo = part[1];
+			os = new FileOutputStream(baseDir + "/" + file_id.getInt("file_id") + "." + tipo);
+			int read = 0;
+			byte[] bytes = new byte[1024];
+
+			while ((read = filecontent.read(bytes)) != -1) {
+				os.write(bytes, 0, read);
 			}
-		}catch (Exception e) {
+			}
+			if(status) {
+				mensaje.put("status", 200).put("response","La subida de archivo se realizo con exito");
+				System.out.println("La subida de archivo se realizo con exito");
+				}else {
+					mensaje.put("status", 409).put("response","Ya existe el nombre del archivo en la tarjeta");
+				}
+			System.out.println("Todo Bien");
+		} catch (Exception e) {
 			e.printStackTrace();
-		}finally {
-			db.closeResources();
+		} finally {
+			if (filecontent != null) {
+				filecontent.close();
+			}
+			if (os != null) {
+				os.close();
+			}
 		}
 		out.println(mensaje.toString());
 		
@@ -136,38 +146,60 @@ public class SubirArchivo extends HttpServlet {
 		JSONObject data = new JSONObject(request.getReader().lines().collect(Collectors.joining(System.lineSeparator())));
 		Queries db = new Queries();
 		ArrayList <JSONObject> arrayFile = new ArrayList<JSONObject>();
+		JSONObject file_name = new JSONObject();
 		
 		JSONObject FileData = new JSONObject();
 		
 		System.out.println("la data es: "+data);
 		
+		
 		try {
-			arrayFile = db.LeerPersonaAdmin(data);
-			if(arrayFile.size() == 1) {
-				System.out.println("Admin");
-				boolean status = db.BorrarArchivo(data);
-				if (status) {
-					mensaje.put("status", 200).put("response", "El archivo fue borrado");
-				}else {
-					mensaje.put("status", 500).put("response","No se puedo borrar");
-				}
-			}else {
-				System.out.println("Invitado");
-				FileData = db.LeerArchivoEspecifico(data);
-				System.out.println("El id del creador es: " +FileData.getInt("user_id"));
-				System.out.println("El id del usuario actual es: "+ data.getInt("id"));
-				if((data.getInt("id")) == (FileData.getInt("user_id"))) {
-					boolean status = db.BorrarArchivo(data);
-					if (status) {
+			file_name= db.ObtenerNombreArchivo(data.getInt("file_id"));
+			String []part = file_name.getString("file_name").split("\\.");
+	        String tipo = part[1];
+	        File fichero = new File("C:\\Users\\Gressia\\git\\Grello\\Grello\\WebContent\\subida\\" + data.getInt("file_id") + "." + tipo);
+	        if(db.SeleccionarAdmin(data.getInt("id"))) {
+				System.out.println("Admin de la pagina");
+				if (db.BorrarArchivo(data)) {
+					if(fichero.delete()) {
 						mensaje.put("status", 200).put("response", "El archivo fue borrado");
 					}else {
 						mensaje.put("status", 500).put("response","No se puedo borrar");
 					}
 				}else {
-					mensaje.put("status", 409).put("response","No es el que subio el archivo a borrar");
-					System.out.println("No es el creador del archivo a borrar");
+					mensaje.put("status", 500).put("response","No se puedo borrar el archivo de la base de datos");
 				}
-			}
+	        }else {
+		        arrayFile = db.LeerPersonaAdmin(data);
+				if(arrayFile.size() == 1) {
+					System.out.println("Admin");
+					if (db.BorrarArchivo(data)) {
+						if(fichero.delete()) {
+							mensaje.put("status", 200).put("response", "El archivo fue borrado");
+						}else {
+							mensaje.put("status", 500).put("response","No se puedo borrar");
+						}
+					}else {
+						mensaje.put("status", 500).put("response","No se puedo borrar el archivo de la base de datos");
+					}
+				}else {
+					System.out.println("Invitado");
+					FileData = db.LeerArchivoEspecifico(data);
+					System.out.println("El id del creador es: " +FileData.getInt("user_id"));
+					System.out.println("El id del usuario actual es: "+ data.getInt("id"));
+					if((data.getInt("id")) == (FileData.getInt("user_id"))) {
+						boolean status = db.BorrarArchivo(data);
+						if (status) {
+							mensaje.put("status", 200).put("response", "El archivo fue borrado");
+						}else {
+							mensaje.put("status", 500).put("response","No se puedo borrar");
+						}
+					}else {
+						mensaje.put("status", 409).put("response","No es el que subio el archivo a borrar");
+						System.out.println("No es el creador del archivo a borrar");
+					}
+				}
+	        }
 		}catch(SQLException e) {
 			e.printStackTrace();
 		} finally {

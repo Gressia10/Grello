@@ -9,7 +9,7 @@ import java.util.Properties;
 
 public class LeerProperties {
 	public Connection con;
-	//private Properties prop = new Properties();
+	//private static Properties prop = new Properties();
 	private static LeerProperties propr = null;
 	
 	public Properties getFile(String url) {

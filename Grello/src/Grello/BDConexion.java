@@ -12,16 +12,13 @@ public class BDConexion extends LeerProperties{
 	public Connection con;
 	public ResultSet rs;
 	public Properties leer= new LeerProperties().getFile("C:\\Users\\Gressia\\git\\Grello\\Grello\\WebContent\\query.properties");
-	//private String url = leer.getProperty("url");
-	//private String user = leer.getProperty("user");
-	//private String password =  leer.getProperty("password");
 	
 	public BDConexion(){
 		  try{
 			this.con = null;		
 		    Class.forName ("org.postgresql.Driver");
 		    this.con = DriverManager.getConnection("jdbc:postgresql://localhost:1099/Grello2", "postgres", "10021999");
-		    //this.con = DriverManager.getConnection (this.url, this.user, this.password);   
+		    //this.con = DriverManager.getConnection (leer.getProperty("url"), leer.getProperty("user"), leer.getProperty("password"));   
 		  } 
 		  catch (Exception e) {
 			e.printStackTrace ();

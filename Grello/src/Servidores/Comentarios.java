@@ -102,18 +102,26 @@ public class Comentarios extends HttpServlet {
 		System.out.println("La data es: "+ data);
 		
 		try {
-			commentData = db.LeerComentarioEspecifico(data);
-			if((data.getInt("id")) == (commentData.getInt("user_id"))) {
-				System.out.println("Entramos en borrar Comentario");
-				boolean status = db.BorrarComentario(data);
-				if(status) {
+			if(db.SeleccionarAdmin(data.getInt("id"))) {
+				System.out.println("Admin de la pagina");
+				if(db.BorrarComentario(data)) {
 					mensaje.put("status", 200).put("response", "Fue borrado el comentario");
 				}else {
 					mensaje.put("status", 500).put("response", "No se pudo borrar el comentario");
 				}
 			}else {
-				mensaje.put("status", 409).put("response","No es el creador del comentario a borrar");
-				System.out.println("No es el creador del comentario a borrar");
+				commentData = db.LeerComentarioEspecifico(data);
+				if((data.getInt("id")) == (commentData.getInt("user_id"))) {
+					System.out.println("Entramos en borrar Comentario");
+					if(db.BorrarComentario(data)) {
+						mensaje.put("status", 200).put("response", "Fue borrado el comentario");
+					}else {
+						mensaje.put("status", 500).put("response", "No se pudo borrar el comentario");
+					}
+				}else {
+					mensaje.put("status", 409).put("response","No es el creador del comentario a borrar");
+					System.out.println("No es el creador del comentario a borrar");
+				}
 			}
 		}catch(SQLException e) {
 			e.printStackTrace();

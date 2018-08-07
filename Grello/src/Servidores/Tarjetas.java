@@ -113,32 +113,39 @@ public class Tarjetas extends HttpServlet {
 		System.out.println("La date es: "+ data);
 		
 		try {
-			arrayCard = db.LeerPersonaAdmin(data);
-			if(arrayCard.size() == 1) {
-				boolean status = db.BorrarTarjeta(data);
-				if (status) {
+			if(db.SeleccionarAdmin(data.getInt("id"))) {
+				System.out.println("Admin de la pagina");
+				if (db.BorrarTarjeta(data)) {
 					System.out.println("Fue borrada la tarjeta");
 					mensaje.put("status", 200).put("response", "La tarjeta fue borrada");
 				}else {
 					mensaje.put("status", 500).put("response","No se puedo borrar");
 				}
 			}else {
-				cardData = db.LeerTarjetaEspecifica(data);
-				System.out.println("El id del creador es: " +cardData.getInt("user_id"));
-				System.out.println("El id del usuario actual es: "+ data.getInt("id"));
-				if((data.getInt("id")) == (cardData.getInt("user_id"))) {
-					boolean status = db.BorrarTarjeta(data);
-					if (status) {
+				arrayCard = db.LeerPersonaAdmin(data);
+				if(arrayCard.size() == 1) {
+					if (db.BorrarTarjeta(data)) {
 						System.out.println("Fue borrada la tarjeta");
 						mensaje.put("status", 200).put("response", "La tarjeta fue borrada");
 					}else {
 						mensaje.put("status", 500).put("response","No se puedo borrar");
 					}
 				}else {
-					mensaje.put("status", 409).put("response","No es el creador de la tarjeta a borrar");
+					cardData = db.LeerTarjetaEspecifica(data);
+					System.out.println("El id del creador es: " +cardData.getInt("user_id"));
+					System.out.println("El id del usuario actual es: "+ data.getInt("id"));
+					if((data.getInt("id")) == (cardData.getInt("user_id"))) {
+						if (db.BorrarTarjeta(data)) {
+							System.out.println("Fue borrada la tarjeta");
+							mensaje.put("status", 200).put("response", "La tarjeta fue borrada");
+						}else {
+							mensaje.put("status", 500).put("response","No se puedo borrar");
+						}
+					}else {
+						mensaje.put("status", 409).put("response","No es el creador de la tarjeta a borrar");
+					}
 				}
 			}
-			
 		}catch(SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -159,31 +166,39 @@ public class Tarjetas extends HttpServlet {
 		
 		System.out.println("Comenzamos con la actualizacion de la tarjeta");
 		try {
-			arrayCard = db.LeerPersonaAdmin(data);
-			if(arrayCard.size() == 1) {
-				boolean status = db.ActualizarTarjeta(data);
-				if (status) {
-						mensaje.put("status", 200).put("response", "La tarjeta fue actualizada");
-						System.out.println("La tarjeta fue actuializada");
+			if(db.SeleccionarAdmin(data.getInt("id"))) {
+				System.out.println("Admin de la pagina");
+				if (db.ActualizarTarjeta(data)) {
+					mensaje.put("status", 200).put("response", "La tarjeta fue actualizada");
+					System.out.println("La tarjeta fue actuializada");
 				}else {
 					mensaje.put("status", 500).put("response:","La tarjeta no fue actualizada");
 				}
 			}else {
-				cardData = db.LeerTarjetaEspecifica(data);
-				System.out.println("El id del creador es: " +cardData.getInt("user_id"));
-				System.out.println("El id del usuario actual es: "+ data.getInt("id"));
-				if((data.getInt("id")) == (cardData.getInt("user_id"))) {
-					boolean status = db.ActualizarTarjeta(data);
-					if (status) {
+				arrayCard = db.LeerPersonaAdmin(data);
+				if(arrayCard.size() == 1) {
+					if (db.ActualizarTarjeta(data)) {
 							mensaje.put("status", 200).put("response", "La tarjeta fue actualizada");
 							System.out.println("La tarjeta fue actuializada");
 					}else {
 						mensaje.put("status", 500).put("response:","La tarjeta no fue actualizada");
-					}	
+					}
 				}else {
-					mensaje.put("status", 409).put("response:","La tarjeta no fue actualiada");
+					cardData = db.LeerTarjetaEspecifica(data);
+					System.out.println("El id del creador es: " +cardData.getInt("user_id"));
+					System.out.println("El id del usuario actual es: "+ data.getInt("id"));
+					if((data.getInt("id")) == (cardData.getInt("user_id"))) {
+						if (db.ActualizarTarjeta(data)) {
+								mensaje.put("status", 200).put("response", "La tarjeta fue actualizada");
+								System.out.println("La tarjeta fue actuializada");
+						}else {
+							mensaje.put("status", 500).put("response:","La tarjeta no fue actualizada");
+						}	
+					}else {
+						mensaje.put("status", 409).put("response:","La tarjeta no fue actualiada");
+					}
+					
 				}
-				
 			}
 			
 		}catch(SQLException e) {

@@ -65,6 +65,11 @@ public class Queries extends BDConexion {
 		this.rs = executeStatement("VerificarIngreso", user.getString("user_username"), encriptada);
 		return this.getData();
 	}
+	//Verficar si una persona es admin de la pagina
+	public boolean SeleccionarAdmin(int value) throws SQLException{
+		this.rs = executeStatement("SeleccionarAdmin", value);
+		return this.rs.next();
+	}
 	
 	
 	//Registrar la cuenta
@@ -257,11 +262,19 @@ public class Queries extends BDConexion {
 		this.rs= executeStatement("LeerEstado", data.getInt("id"),data .getInt("board_id"));
 		return this.rs.next();
 	}
+	public boolean LeerEstadoPersona(JSONObject data) throws SQLException{
+		this.rs= executeStatement("LeerEstado", data.getInt("user_id"),data .getInt("board_id"));
+		return this.rs.next();
+	}
 	
 	
-	//----------------------------------Buscar Usuario en el buscador----------------------------------------------
+	//----------------------------------Buscar tableros en el buscador----------------------------------------------
 	public ArrayList<JSONObject> Buscador(String board_name)throws SQLException{
 		this.rs = executeStatement("Buscador", board_name);
+		return this.getArray();
+	}
+	public ArrayList<JSONObject> BuscadorAdmin(String board_name)throws SQLException{
+		this.rs = executeStatement("BuscadorAdmin", board_name);
 		return this.getArray();
 	}
 	
@@ -280,6 +293,10 @@ public class Queries extends BDConexion {
 	}
 	public boolean BorrarInvitado(JSONObject data) throws SQLException{
 		int i = executeUpdate("BorrarInvitado", data.getInt("user_id"));
+		return (i == 1)?true:false;
+	}
+	public boolean BorrarPersona(JSONObject data) throws SQLException{
+		int i = executeUpdate("BorrarPersona", data.getInt("user_id"));
 		return (i == 1)?true:false;
 	}
 	
@@ -338,13 +355,17 @@ public class Queries extends BDConexion {
 		this.rs = executeStatement("ObtenerNombreArchivo", id);
 		return this.getData();
 	}
+	public JSONObject ObtenerIdArchivo (Integer card_id, String file_name)throws SQLException{
+		this.rs = executeStatement("ObtenerIdArchivo", card_id, file_name);
+		return this.getData();
+	}
 	public boolean BorrarArchivo(JSONObject data) throws SQLException{
 		int i = executeUpdate("BorrarArchivo", data.getInt("file_id"));
 		return (i == 1)?true:false;
 	}
 	public boolean VerificarArchivo(int card_id, String file_name) throws SQLException{
-		int i = executeUpdate("VerificarArchivo",card_id, file_name);
-		return (i == 1)?true:false;
+		this.rs = executeStatement("VerificarArchivo",card_id, file_name);
+		return this.rs.next();
 	}
 	
 	

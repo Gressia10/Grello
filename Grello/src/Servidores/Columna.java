@@ -117,30 +117,37 @@ public class Columna extends HttpServlet {
 		System.out.println("la data es: "+data);
 		
 		try {
-			arrayColumn = db.LeerPersonaAdmin(data);
-			if(arrayColumn.size() == 1) {
-				System.out.println("Admin");
-				boolean status = db.BorrarColumna(data);
-				if (status) {
+			if(db.SeleccionarAdmin(data.getInt("id"))) {
+				System.out.println("Admin de la pagina");
+				if (db.BorrarColumna(data)) {
 					mensaje.put("status", 200).put("response", "La columna fue borrada");
 				}else {
 					mensaje.put("status", 500).put("response","No se puedo borrar");
 				}
 			}else {
-				System.out.println("Invitado");
-				columnData = db.LeerColumnaEspecifica(data);
-				System.out.println("El id del creador es: " +columnData.getInt("user_id"));
-				System.out.println("El id del usuario actual es: "+ data.getInt("id"));
-				if((data.getInt("id")) == (columnData.getInt("user_id"))) {
-					boolean status = db.BorrarColumna(data);
-					if (status) {
+				arrayColumn = db.LeerPersonaAdmin(data);
+				if(arrayColumn.size() == 1) {
+					System.out.println("Admin");
+					if (db.BorrarColumna(data)) {
 						mensaje.put("status", 200).put("response", "La columna fue borrada");
 					}else {
 						mensaje.put("status", 500).put("response","No se puedo borrar");
 					}
 				}else {
-					mensaje.put("status", 409).put("response","No es el creador de la columna a borrar");
-					System.out.println("No es el creador de la columna a borrar");
+					System.out.println("Invitado");
+					columnData = db.LeerColumnaEspecifica(data);
+					System.out.println("El id del creador es: " +columnData.getInt("user_id"));
+					System.out.println("El id del usuario actual es: "+ data.getInt("id"));
+					if((data.getInt("id")) == (columnData.getInt("user_id"))) {
+						if (db.BorrarColumna(data)) {
+							mensaje.put("status", 200).put("response", "La columna fue borrada");
+						}else {
+							mensaje.put("status", 500).put("response","No se puedo borrar");
+						}
+					}else {
+						mensaje.put("status", 409).put("response","No es el creador de la columna a borrar");
+						System.out.println("No es el creador de la columna a borrar");
+					}
 				}
 			}
 		}catch(SQLException e) {
@@ -164,30 +171,37 @@ public class Columna extends HttpServlet {
 		
 		try {
 			System.out.println("Empezamos Actualizar columna");
-			arrayColumn = db.LeerPersonaAdmin(data);
-			if(arrayColumn.size() == 1) {
-				System.out.println("Admin");
-				boolean status = db.ActualizarColumna(data);
-				if (status) {
-						mensaje.put("status", 200).put("response", "El tablero fue actualizado");
+			if(db.SeleccionarAdmin(data.getInt("id"))) {
+				System.out.println("Admin de la pagina");
+				if (db.ActualizarColumna(data)) {
+					mensaje.put("status", 200).put("response", "La columna fue actualizada");
 				}else {
-					mensaje.put("status", 500).put("response","El tablero no fue actualizado");
+					mensaje.put("status", 500).put("response","la columna no fue actualizada");
 				}
 			}else {
-				System.out.println("Invitado");
-				columnData = db.LeerColumnaEspecifica(data);
-				System.out.println("El id del creador es: " +columnData.getInt("user_id"));
-				System.out.println("El id del usuario actual es: "+ data.getInt("id"));
-				if((data.getInt("id")) == (columnData.getInt("user_id"))) {
-					boolean status = db.ActualizarColumna(data);
-					if (status) {
-							mensaje.put("status", 200).put("response", "La columna fue actualizada");
+				arrayColumn = db.LeerPersonaAdmin(data);
+				if(arrayColumn.size() == 1) {
+					System.out.println("Admin");
+					if (db.ActualizarColumna(data)) {
+							mensaje.put("status", 200).put("response", "El tablero fue actualizado");
 					}else {
-						mensaje.put("status", 500).put("response","la columna no fue actualizada");
-					}	
+						mensaje.put("status", 500).put("response","El tablero no fue actualizado");
+					}
 				}else {
-					mensaje.put("status", 409).put("response","No es el creador de la columna a modificar");
-					System.out.println("No es el creador de la columna a modificar");
+					System.out.println("Invitado");
+					columnData = db.LeerColumnaEspecifica(data);
+					System.out.println("El id del creador es: " +columnData.getInt("user_id"));
+					System.out.println("El id del usuario actual es: "+ data.getInt("id"));
+					if((data.getInt("id")) == (columnData.getInt("user_id"))) {
+						if (db.ActualizarColumna(data)) {
+								mensaje.put("status", 200).put("response", "La columna fue actualizada");
+						}else {
+							mensaje.put("status", 500).put("response","la columna no fue actualizada");
+						}	
+					}else {
+						mensaje.put("status", 409).put("response","No es el creador de la columna a modificar");
+						System.out.println("No es el creador de la columna a modificar");
+					}
 				}
 			}
 			
