@@ -29,7 +29,10 @@ public class LeerProperties {
 		System.out.println(prop.toString());
 		return prop;
 	}
-	public static LeerProperties getInstance () {
+	public static synchronized LeerProperties getInstance () {
+		/*if(propr == null) {
+			propr = new LeerProperties();
+		}*/
 		return propr = ((propr == null) ? propr = new LeerProperties() : propr);
 	}
 	/*public String getValue(String key){
